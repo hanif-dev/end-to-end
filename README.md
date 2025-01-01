@@ -1,2 +1,1 @@
-# end-to-end
-End-to-End Data Analysis Project Using SQL, Python, and Power BI
+# End-to-End Data Analysis for Retail Company Using SQL, Python, and Power BI
