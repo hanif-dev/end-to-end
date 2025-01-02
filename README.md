@@ -1,4 +1,3 @@
-```markdown
 # End-to-End Data Analysis and Power BI Dashboard
 
 ## Project Objective
@@ -144,6 +143,6 @@ Project/
 
 2. **MySQL Connection**: Saya telah menambahkan kode Python untuk mengonfigurasi koneksi MySQL menggunakan SQLAlchemy, serta cara membaca data dari database MySQL ke dalam DataFrame Pandas.
 
-3. **Power BI Dashboard**: 
+3. **Power BI Dashboard**: -
 
 4. **Project Steps dan Folder Structure**:
