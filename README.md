@@ -146,3 +146,4 @@ Project/
 3. **Power BI Dashboard**: File Power BI (sales-retail-dashboard.pbix) berisi visualisasi interaktif, termasuk tren penjualan bulanan, distribusi kategori produk, demografi pelanggan, dan perubahan penjualan dari waktu ke waktu.
 
 4. **Project Steps dan Folder Structure**: Data dibersihkan menggunakan Python dan SQL, disimpan di MySQL, lalu divisualisasikan dalam dashboard Power BI yang interaktif.
+```
