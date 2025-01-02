@@ -1,0 +1,624 @@
+   mysql -u root -p
+
+
+   CREATE DATABASE sales_database;
+   USE sales_database;
+
+
+   CREATE USER 'python_user'@'localhost' IDENTIFIED BY '';
+   GRANT ALL PRIVILEGES ON sales_database.* TO 'python_user'@'localhost';
+   FLUSH PRIVILEGES;
+
+
+SELECT 
+    TABLE_NAME AS TableName,
+    COLUMN_NAME AS ColumnName
+FROM 
+    information_schema.COLUMNS
+WHERE 
+    TABLE_SCHEMA = 'sales_database'
+    AND TABLE_NAME IN (
+        'fact_InternetSales',
+        'dim_ProductCategory',
+        'dim_ProductSubcategory',
+        'dim_Product',
+        'dim_SalesTeritory',
+        'dim_Currency',
+        'dim_Customer'
+    )
+ORDER BY 
+    TABLE_NAME, ORDINAL_POSITION;
+
+SHOW CREATE TABLE fact_internetsales;
+
+
+SELECT SalesOrderNumber, COUNT(*)
+FROM fact_internetsales
+GROUP BY SalesOrderNumber
+HAVING COUNT(*) > 1;
+
+
+SELECT COUNT(*)
+FROM fact_internetsales
+WHERE SalesOrderNumber IS NULL;
+
+
+ALTER TABLE fact_internetsales
+ADD PRIMARY KEY (SalesOrderNumber, SalesOrderLineNumber);
+
+
+SELECT 
+    COLUMN_NAME
+FROM 
+    information_schema.KEY_COLUMN_USAGE
+WHERE 
+    TABLE_SCHEMA = 'sales_database' AND
+    TABLE_NAME = 'fact_internetsales' AND
+    CONSTRAINT_NAME = 'PRIMARY';
+
+
+SHOW CREATE TABLE dim_ProductCategory;
+
+
+SELECT ProductCategoryID, COUNT(*)
+FROM dim_productcategory
+GROUP BY ProductCategoryID
+HAVING COUNT(*) > 1;
+
+
+SELECT COUNT(*)
+FROM dim_productcategory
+WHERE ProductCategoryID IS NULL;
+
+
+ALTER TABLE dim_productcategory
+ADD PRIMARY KEY (ProductCategoryID);
+
+
+SELECT 
+    COLUMN_NAME
+FROM 
+    information_schema.KEY_COLUMN_USAGE
+WHERE 
+    TABLE_SCHEMA = 'sales_database' AND
+    TABLE_NAME = 'dim_productcategory' AND
+    CONSTRAINT_NAME = 'PRIMARY';
+
+
+SHOW CREATE TABLE dim_ProductSubcategory;
+
+
+SELECT ProductSubcategoryID, COUNT(*)
+FROM dim_productsubcategory
+GROUP BY ProductSubcategoryID
+HAVING COUNT(*) > 1;
+
+
+SELECT COUNT(*)
+FROM dim_productsubcategory
+WHERE ProductSubcategoryID IS NULL;
+
+
+ALTER TABLE dim_productsubcategory
+ADD PRIMARY KEY (ProductSubcategoryID);
+
+
+SELECT 
+    COLUMN_NAME
+FROM 
+    information_schema.KEY_COLUMN_USAGE
+WHERE 
+    TABLE_SCHEMA = 'sales_database' AND
+    TABLE_NAME = 'dim_productsubcategory' AND
+    CONSTRAINT_NAME = 'PRIMARY';
+
+
+SHOW CREATE TABLE dim_Product;
+
+
+SELECT ProductKey, COUNT(*)
+FROM dim_product
+GROUP BY ProductKey
+HAVING COUNT(*) > 1;
+
+SELECT COUNT(*)
+FROM dim_product
+WHERE ProductKey IS NULL;
+
+ALTER TABLE dim_product
+ADD PRIMARY KEY (ProductKey);
+
+
+SELECT 
+    COLUMN_NAME
+FROM 
+    information_schema.KEY_COLUMN_USAGE
+WHERE 
+    TABLE_SCHEMA = 'sales_database' AND
+    TABLE_NAME = 'dim_product' AND
+    CONSTRAINT_NAME = 'PRIMARY';
+
+
+SHOW CREATE TABLE dim_SalesTeritory;
+
+
+SELECT SalesTerritoryKey, COUNT(*)
+FROM dim_SalesTeritory
+GROUP BY SalesTerritoryKey
+HAVING COUNT(*) > 1;
+
+
+SELECT COUNT(*)
+FROM dim_SalesTeritory
+WHERE SalesTerritoryKey IS NULL;
+
+
+ALTER TABLE dim_salesteritory
+ADD PRIMARY KEY (SalesTerritoryKey);
+
+
+SELECT 
+    COLUMN_NAME
+FROM 
+    information_schema.KEY_COLUMN_USAGE
+WHERE 
+    TABLE_SCHEMA = 'sales_database' AND
+    TABLE_NAME = 'dim_salesteritory' AND
+    CONSTRAINT_NAME = 'PRIMARY';
+
+
+SHOW CREATE TABLE dim_Currency;
+
+
+SELECT CurrencyKey, COUNT(*)
+FROM dim_Currency
+GROUP BY CurrencyKey
+HAVING COUNT(*) > 1;
+
+
+SELECT COUNT(*)
+FROM dim_Currency
+WHERE CurrencyKey IS NULL;
+
+
+ALTER TABLE dim_currency
+ADD PRIMARY KEY (CurrencyKey);
+
+
+SELECT 
+    COLUMN_NAME
+FROM 
+    information_schema.KEY_COLUMN_USAGE
+WHERE 
+    TABLE_SCHEMA = 'sales_database' AND
+    TABLE_NAME = 'dim_currency' AND
+    CONSTRAINT_NAME = 'PRIMARY';
+
+
+SHOW CREATE TABLE dim_Customer;
+
+
+SELECT CustomerKey, COUNT(*)
+FROM dim_Customer
+GROUP BY CustomerKey
+HAVING COUNT(*) > 1;
+
+
+SELECT COUNT(*)
+FROM dim_Customer
+WHERE CustomerKey IS NULL;
+
+
+ALTER TABLE dim_customer
+ADD PRIMARY KEY (CustomerKey);
+
+
+SELECT 
+    COLUMN_NAME
+FROM 
+    information_schema.KEY_COLUMN_USAGE
+WHERE 
+    TABLE_SCHEMA = 'sales_database' AND
+    TABLE_NAME = 'dim_customer' AND
+    CONSTRAINT_NAME = 'PRIMARY';
+
+
+CREATE VIEW clean_sales_data AS
+SELECT 
+    f.SalesOrderNumber,
+    f.SalesOrderLineNumber,
+    f.OrderDate,
+    f.DueDate,
+    f.ShipDate,
+    f.SalesAmount,
+    f.TaxAmt,
+    f.Freight,
+    c.FirstName AS CustomerFirstName,
+    c.LastName AS CustomerLastName,
+    c.Gender,
+    c.YearlyIncome,
+    c.MaritalStatus,
+    c.TotalChildren,
+    c.NumberChildrenAtHome,
+    c.HouseOwnerFlag,
+    c.NumberCarsOwned,
+    c.CommuteDistance,
+    p.EnglishProductName AS ProductName,
+    p.StandardCost,
+    p.Color,
+    ps.Name AS ProductSubcategoryName,
+    ps.rowguid AS SubcategoryRowGUID,
+    pc.Name AS ProductCategoryName,
+    pc.rowguid AS CategoryRowGUID,
+    cu.CurrencyName,
+    st.SalesTerritoryCountry,
+    st.SalesTerritoryRegion
+FROM fact_internetsales f
+LEFT JOIN dim_customer c ON f.CustomerKey = c.CustomerKey
+LEFT JOIN dim_product p ON f.ProductKey = p.ProductKey
+LEFT JOIN dim_productsubcategory ps ON p.ProductSubcategoryKey = ps.ProductSubcategoryID
+LEFT JOIN dim_productcategory pc ON ps.ProductCategoryID = pc.ProductCategoryID
+LEFT JOIN dim_currency cu ON f.CurrencyKey = cu.CurrencyKey
+LEFT JOIN dim_salesteritory st ON f.SalesTerritoryKey = st.SalesTerritoryKey;
+
+SELECT * FROM clean_sales_data LIMIT 10;
+
+
+DESCRIBE clean_sales_data;
+
+
+SHOW COLUMNS FROM clean_sales_data;
+
+
+SELECT 
+    COUNT(*) AS TotalRows,
+    SUM(CASE WHEN SalesOrderNumber IS NULL THEN 1 ELSE 0 END) AS NullSalesOrderNumber,
+    SUM(CASE WHEN OrderDate IS NULL THEN 1 ELSE 0 END) AS NullOrderDate,
+    SUM(CASE WHEN DueDate IS NULL THEN 1 ELSE 0 END) AS NullDueDate,
+    SUM(CASE WHEN ShipDate IS NULL THEN 1 ELSE 0 END) AS NullShipDate,
+    SUM(CASE WHEN SalesAmount IS NULL THEN 1 ELSE 0 END) AS NullSalesAmount,
+    SUM(CASE WHEN CustomerFirstName IS NULL THEN 1 ELSE 0 END) AS NullCustomerFirstName,
+    SUM(CASE WHEN ProductName IS NULL THEN 1 ELSE 0 END) AS NullProductName
+FROM clean_sales_data;
+
+
+SELECT 
+    SalesOrderNumber, SalesOrderLineNumber, COUNT(*) AS DuplicateCount
+FROM clean_sales_data
+GROUP BY SalesOrderNumber, SalesOrderLineNumber
+HAVING COUNT(*) > 1;
+
+
+SELECT 
+    SubcategoryRowGUID, 
+    ProductSubcategoryName, 
+    CategoryRowGUID, 
+    ProductCategoryName, 
+    COUNT(*) AS Occurrences
+FROM 
+    clean_sales_data
+GROUP BY 
+    SubcategoryRowGUID, 
+    ProductSubcategoryName, 
+    CategoryRowGUID, 
+    ProductCategoryName
+HAVING 
+    COUNT(*) > 1
+ORDER BY 
+    SubcategoryRowGUID, 
+    CategoryRowGUID;
+
+
+SELECT 
+    OrderDate, DueDate, ShipDate
+FROM 
+    clean_sales_data
+WHERE 
+    (OrderDate NOT REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$' OR
+     DueDate NOT REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$' OR
+     ShipDate NOT REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$');
+
+
+SELECT 
+    OrderDate, DueDate, ShipDate
+FROM clean_sales_data
+WHERE 
+    STR_TO_DATE(OrderDate, '%Y-%m-%d') IS NULL OR
+    STR_TO_DATE(DueDate, '%Y-%m-%d') IS NULL OR
+    STR_TO_DATE(ShipDate, '%Y-%m-%d') IS NULL;
+
+
+CREATE TABLE clean_sales_data_table AS
+SELECT * FROM clean_sales_data;
+
+
+ALTER TABLE clean_sales_data_table
+MODIFY COLUMN OrderDate DATE,
+MODIFY COLUMN DueDate DATE,
+MODIFY COLUMN ShipDate DATE;
+
+
+UPDATE clean_sales_data_table
+SET 
+    OrderDate = DATE(OrderDate),
+    DueDate = DATE(DueDate),
+    ShipDate = DATE(ShipDate);
+
+
+SELECT DISTINCT ProductCategoryName
+FROM clean_sales_data_table;
+
+
+SELECT 
+    pc.Name AS ProductCategoryName,
+    COUNT(fi.ProductKey) AS TotalProductsSold,
+    SUM(fi.SalesAmount) AS TotalSales
+FROM fact_internetsales fi
+LEFT JOIN dim_product p ON fi.ProductKey = p.ProductKey
+LEFT JOIN dim_productsubcategory ps ON p.ProductSubcategoryKey = ps.ProductSubcategoryID
+LEFT JOIN dim_productcategory pc ON ps.ProductCategoryID = pc.ProductCategoryID
+GROUP BY pc.Name
+ORDER BY TotalSales DESC;
+
+
+CREATE OR REPLACE VIEW clean_sales_data AS
+SELECT 
+    f.SalesOrderNumber,
+    f.SalesOrderLineNumber,
+    f.OrderDate,
+    f.DueDate,
+    f.ShipDate,
+    f.SalesAmount,
+    f.TaxAmt,
+    f.Freight,
+    c.FirstName AS CustomerFirstName,
+    c.LastName AS CustomerLastName,
+    c.Gender,
+    c.YearlyIncome,
+    c.MaritalStatus,
+    c.TotalChildren,
+    c.NumberChildrenAtHome,
+    c.HouseOwnerFlag,
+    c.NumberCarsOwned,
+    c.CommuteDistance,
+    p.EnglishProductName AS ProductName,
+    p.StandardCost,
+    p.Color,
+    ps.Name AS ProductSubcategoryName,
+    ps.rowguid AS SubcategoryRowGUID,
+    pc.Name AS ProductCategoryName,
+    pc.rowguid AS CategoryRowGUID,
+    cu.CurrencyName,
+    st.SalesTerritoryCountry,
+    st.SalesTerritoryRegion
+FROM fact_internetsales f
+RIGHT JOIN dim_product p ON f.ProductKey = p.ProductKey
+LEFT JOIN dim_productsubcategory ps ON p.ProductSubcategoryKey = ps.ProductSubcategoryID
+LEFT JOIN dim_productcategory pc ON ps.ProductCategoryID = pc.ProductCategoryID
+LEFT JOIN dim_customer c ON f.CustomerKey = c.CustomerKey
+LEFT JOIN dim_currency cu ON f.CurrencyKey = cu.CurrencyKey
+LEFT JOIN dim_salesteritory st ON f.SalesTerritoryKey = st.SalesTerritoryKey;
+
+ALTER TABLE clean_sales_data_table
+MODIFY COLUMN SalesOrderNumber VARCHAR(50) DEFAULT NULL;
+
+
+INSERT INTO clean_sales_data_table (SalesOrderLineNumber, ProductCategoryName, SalesAmount, TaxAmt)
+SELECT 0, 'Components', 0, 0
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM clean_sales_data_table 
+    WHERE ProductCategoryName = 'Components'
+);
+
+
+SELECT DISTINCT CurrencyName
+FROM clean_sales_data_table;
+
+
+SELECT 
+    CurrencyName, 
+    COUNT(*) AS Frequency
+FROM clean_sales_data_table
+GROUP BY CurrencyName
+ORDER BY Frequency DESC;
+
+
+SELECT 
+    CurrencyName, 
+    SUM(SalesAmount) AS TotalSales
+FROM clean_sales_data_table
+WHERE CurrencyName IS NOT NULL
+GROUP BY CurrencyName;
+
+
+SELECT *
+FROM clean_sales_data_table
+WHERE CurrencyName IS NULL;
+
+
+CREATE TABLE components_placeholder AS
+SELECT *
+FROM clean_sales_data_table
+WHERE ProductCategoryName = 'Components' AND CurrencyName IS NULL;
+
+DELETE FROM clean_sales_data_table
+WHERE ProductCategoryName = 'Components' AND CurrencyName IS NULL;
+
+
+SELECT SalesOrderNumber, OrderDate, DueDate
+FROM clean_sales_data_table  
+WHERE DueDate < OrderDate;
+
+
+WITH ranked_data AS (
+    SELECT 
+        SalesAmount,
+        NTILE(4) OVER (ORDER BY SalesAmount) AS quartile
+    FROM clean_sales_data_table
+)
+SELECT 
+    quartile,
+    MIN(SalesAmount) AS min_value,
+    MAX(SalesAmount) AS max_value
+FROM ranked_data
+GROUP BY quartile
+ORDER BY quartile;
+
+WITH ranked_data AS (
+    SELECT 
+        SalesAmount,
+        NTILE(4) OVER (ORDER BY SalesAmount) AS quartile
+    FROM clean_sales_data_table
+),
+quartile_values AS (
+    SELECT 
+        quartile,
+        MIN(SalesAmount) AS min_value,
+        MAX(SalesAmount) AS max_value
+    FROM ranked_data
+    GROUP BY quartile
+),
+iqr_calc AS (
+    SELECT
+        (SELECT max_value FROM quartile_values WHERE quartile = 3) AS Q3,
+        (SELECT min_value FROM quartile_values WHERE quartile = 1) AS Q1
+)
+SELECT 
+    *,
+    (Q3 - Q1) AS IQR,
+    (Q1 - 1.5 * (Q3 - Q1)) AS lower_bound,
+    (Q3 + 1.5 * (Q3 - Q1)) AS upper_bound
+FROM iqr_calc;
+
+
+SELECT *
+FROM clean_sales_data_table
+WHERE SalesAmount > 1346.54;
+
+
+SELECT COUNT(*) AS outlier_count
+FROM clean_sales_data_table
+WHERE SalesAmount > 1346.54;
+
+
+ALTER TABLE clean_sales_data_table
+ADD COLUMN BirthDate DATE,
+ADD COLUMN DateFirstPurchase DATE;
+
+
+UPDATE clean_sales_data_table t
+JOIN dim_customer c ON t.CustomerFirstName = c.FirstName AND t.CustomerLastName = c.LastName
+SET 
+    t.BirthDate = c.BirthDate,
+    t.DateFirstPurchase = c.DateFirstPurchase;
+
+
+CREATE VIEW clean_sales_data AS 
+SELECT 
+    f.SalesOrderNumber,
+    f.SalesOrderLineNumber,
+    f.OrderDate,
+    f.DueDate,
+    f.ShipDate,
+    f.SalesAmount,
+    f.TaxAmt,
+    f.Freight,
+    c.FirstName AS CustomerFirstName,
+    c.LastName AS CustomerLastName,
+    c.Gender,
+    c.YearlyIncome,
+    c.MaritalStatus,
+    c.TotalChildren,
+    c.NumberChildrenAtHome,
+    c.HouseOwnerFlag,
+    c.NumberCarsOwned,
+    c.CommuteDistance,
+    c.BirthDate,               -- Kolom baru ditambahkan
+    c.DateFirstPurchase,       -- Kolom baru ditambahkan
+    p.EnglishProductName AS ProductName,
+    p.StandardCost,
+    p.Color,
+    ps.Name AS ProductSubcategoryName,
+    ps.rowguid AS SubcategoryRowGUID,
+    pc.Name AS ProductCategoryName,
+    pc.rowguid AS CategoryRowGUID,
+    cu.CurrencyName,
+    st.SalesTerritoryCountry,
+    st.SalesTerritoryRegion
+FROM fact_internetsales f
+LEFT JOIN dim_customer c ON f.CustomerKey = c.CustomerKey
+LEFT JOIN dim_product p ON f.ProductKey = p.ProductKey
+LEFT JOIN dim_productsubcategory ps ON p.ProductSubcategoryKey = ps.ProductSubcategoryID
+LEFT JOIN dim_productcategory pc ON ps.ProductCategoryID = pc.ProductCategoryID
+LEFT JOIN dim_currency cu ON f.CurrencyKey = cu.CurrencyKey
+LEFT JOIN dim_salesteritory st ON f.SalesTerritoryKey = st.SalesTerritoryKey;
+
+
+
+CREATE TABLE clean_sales_data_table AS
+SELECT * FROM clean_sales_data;
+
+
+ALTER TABLE clean_sales_data_table
+MODIFY COLUMN OrderDate DATE,
+MODIFY COLUMN DueDate DATE,
+MODIFY COLUMN ShipDate DATE,
+MODIFY COLUMN BirthDate DATE,
+MODIFY COLUMN DateFirstPurchase DATE;
+
+
+UPDATE clean_sales_data_table
+SET 
+    OrderDate = DATE(OrderDate),
+    DueDate = DATE(DueDate),
+    ShipDate = DATE(ShipDate),
+    BirthDate = DATE(BirthDate),
+    DateFirstPurchase = DATE(DateFirstPurchase);
+
+
+SELECT COUNT(*)
+FROM clean_sales_data_table
+WHERE Color IS NULL;
+
+
+UPDATE clean_sales_data_table
+SET Color = 'Unknown'
+WHERE Color IS NULL;
+
+
+SELECT DISTINCT Color FROM clean_sales_data_table;
+
+
+SELECT * FROM clean_sales_data_table  WHERE CommuteDistance  NOT IN ('0-1 Miles', '1-2 Miles', '2-5 Miles', '5-10 Miles', '10+ Miles');
+
+
+SELECT * FROM clean_sales_data_table  WHERE Gender  NOT IN ('M', 'F');
+
+
+SELECT * FROM clean_sales_data_table  WHERE BirthDate > CURRENT_DATE OR BirthDate < '1900-01-01';
+
+
+SELECT * FROM clean_sales_data_table  WHERE TotalChildren < 0;
+
+
+ CREATE TABLE clean_sales_data_table AS
+     SELECT * FROM clean_sales_data;
+
+
+ALTER TABLE clean_sales_data_table
+MODIFY COLUMN OrderDate DATE,
+MODIFY COLUMN DueDate DATE,
+MODIFY COLUMN ShipDate DATE;
+
+
+UPDATE clean_sales_data_table
+SET Gender = CASE 
+    WHEN Gender = 'M' THEN 'Male'
+    WHEN Gender = 'F' THEN 'Female'
+END;
+
+mysqldump -u root -p sales_database clean_sales_data_table > "D:/Portofolio_Project/Portfolio/Data Analysis/end-to-end/output/clean_sales_data_table.sql"
+
+
+mysqldump -u root -p sales_database > "D:/Portofolio_Project/Portfolio/Data Analysis/end-to-end/output/sales_database.sql"
