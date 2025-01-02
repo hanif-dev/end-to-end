@@ -137,13 +137,13 @@ Project/
 
 ```
 
-### Penjelasan:
+Penjelasan:
 
-1. **Data Preprocessing**: Langkah ini menggunakan Python dan SQLAlchemy untuk memuat data dari file `.xlsx` dan mengkonversinya ke dalam database MySQL secara langsung, bukan ekspor SQL manual. Koneksi ke MySQL dilakukan dengan SQLAlchemy dan data dibaca langsung ke dalam notebook Jupyter menggunakan `pandas.read_sql()`.
+1. Data Preprocessing: Langkah ini menggunakan Python dan SQLAlchemy untuk memuat data dari file `.xlsx` dan mengkonversinya ke dalam database MySQL secara langsung, bukan ekspor SQL manual. Koneksi ke MySQL dilakukan dengan SQLAlchemy dan data dibaca langsung ke dalam notebook Jupyter menggunakan `pandas.read_sql()`.
 
-2. **MySQL Connection**: Saya telah menambahkan kode Python untuk mengonfigurasi koneksi MySQL menggunakan SQLAlchemy, serta cara membaca data dari database MySQL ke dalam DataFrame Pandas.
+2. MySQL Connection: Saya telah menambahkan kode Python untuk mengonfigurasi koneksi MySQL menggunakan SQLAlchemy, serta cara membaca data dari database MySQL ke dalam DataFrame Pandas.
 
-3. **Power BI Dashboard**: File Power BI (sales-retail-dashboard.pbix) berisi visualisasi interaktif, termasuk tren penjualan bulanan, distribusi kategori produk, demografi pelanggan, dan perubahan penjualan dari waktu ke waktu.
+3. Power BI Dashboard: File Power BI (sales-retail-dashboard.pbix) berisi visualisasi interaktif, termasuk tren penjualan bulanan, distribusi kategori produk, demografi pelanggan, dan perubahan penjualan dari waktu ke waktu.
 
-4. **Project Steps dan Folder Structure**: Data dibersihkan menggunakan Python dan SQL, disimpan di MySQL, lalu divisualisasikan dalam dashboard Power BI yang interaktif.
+4. Project Steps dan Folder Structure: Data dibersihkan menggunakan Python dan SQL, disimpan di MySQL, lalu divisualisasikan dalam dashboard Power BI yang interaktif.
 ```
