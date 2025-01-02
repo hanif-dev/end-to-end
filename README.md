@@ -143,6 +143,6 @@ Project/
 
 2. **MySQL Connection**: Saya telah menambahkan kode Python untuk mengonfigurasi koneksi MySQL menggunakan SQLAlchemy, serta cara membaca data dari database MySQL ke dalam DataFrame Pandas.
 
-3. **Power BI Dashboard**: -
+3. **Power BI Dashboard**: File Power BI (sales-retail-dashboard.pbix) berisi visualisasi interaktif, termasuk tren penjualan bulanan, distribusi kategori produk, demografi pelanggan, dan perubahan penjualan dari waktu ke waktu.
 
-4. **Project Steps dan Folder Structure**:
+4. **Project Steps dan Folder Structure**: Data dibersihkan menggunakan Python dan SQL, disimpan di MySQL, lalu divisualisasikan dalam dashboard Power BI yang interaktif.
