@@ -90,22 +90,16 @@ Project/
 │   ├── df.csv                    # Processed and cleaned data for Power BI
 │
 ├── Scripts/
-│   ├── End-to-End.py             # Python script for data cleaning and preprocessing
+│   ├── End-to-End.ipynb          # Python script for data cleaning and preprocessing
 │   ├── export_to_sql.py          # Python script to export cleaned data to SQL
 │
 ├── SQL/
-│   ├── queries/                 # SQL scripts for data preprocessing and transformation
-│   │   ├── create_tables.sql    # SQL script to create necessary tables in MySQL
-│   │   ├── data_transformation.sql  # SQL script for transforming raw data
-│   │   └── data_inserts.sql     # SQL script for inserting data into tables
-│   └── sales_database.sql       # SQL dump of the cleaned database
+│   ├── queries.txt                  # SQL scripts for data preprocessing and transformation  
+│   ├── clean_sales_data_table.sql   # SQL file for cleaned sales data
 │
 ├── PowerBI/
-│   ├── sales-retail-dashboard.pbix  # Power BI dashboard file
-│
-└── Output/
-    ├── clean_sales_data_table.sql   # SQL file for cleaned sales data
-    └── multiple_tables.sql          # SQL file for multiple tables
+    ├── sales-retail-dashboard.pbix  # Power BI dashboard file
+
 ```
 
 ## Installation and Setup
